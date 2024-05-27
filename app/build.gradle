@@ -1,0 +1,53 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace "com.cloudpos.convertdifffinger"
+    compileSdkVersion 30
+    defaultConfig {
+        applicationId "com.cloudpos.convertdifffinger"
+        minSdkVersion 19
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk{
+            abiFilters 'armeabi-v7a'
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets {
+        main {
+//            java.srcDirs = ['src/main/java',]
+//            aidl.srcDirs = ['src_aidl/main/aidl']
+            jniLibs.srcDirs = ['jniLibs']
+        }
+    }
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+//    repositories {
+//        flatDir {
+//            dirs 'libs'
+//        }
+//    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar", "*.aar"])
+//    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:23.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:2.0.4'
+//    implementation files('libs/androidtfm1.0.jar')
+//    implementation files('libs/dpuareu.jar')
+//    implementation files ('libs/sdk.jar')
+}
