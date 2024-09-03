@@ -13,12 +13,15 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.cloudpos.DeviceException;
+import com.cloudpos.OperationResult;
 import com.cloudpos.POSTerminal;
+import com.cloudpos.TimeConstants;
 import com.cloudpos.convertdifffinger.mgr.FPMgrImpl;
 import com.cloudpos.convertdifffinger.mgr.IFPMgr;
 import com.cloudpos.convertdifffinger.utils.HexString;
 import com.cloudpos.fingerprint.Fingerprint;
 import com.cloudpos.fingerprint.FingerprintDevice;
+import com.cloudpos.fingerprint.FingerprintOperationResult;
 import com.digitalpersona.uareu.Engine;
 import com.digitalpersona.uareu.Fmd;
 import com.digitalpersona.uareu.Importer;
@@ -65,17 +68,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         };
 
-        //ready importer and engine
-        try {
-            mImporter = UareUGlobal.GetImporter();
-            mEngine = UareUGlobal.GetEngine();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
 
         deviceType = checkDeviceType();
-
-        if (deviceType.contains("tuzhengbig")) {
+        Log.d("deviceType：", deviceType);
+        if (deviceType.toLowerCase(Locale.ROOT).contains("tuzheng")) {
             final Context context = this;
             //ready FingerprintDevice
             new Thread(new Runnable() {
@@ -93,6 +90,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
             }).start();
+        }else {
+            //ready importer and engine
+            try {
+                mImporter = UareUGlobal.GetImporter();
+                mEngine = UareUGlobal.GetEngine();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         log_text.setText("deviceType is " + deviceType + "\n");
     }
@@ -274,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        if (deviceType.contains("tuzhengbig")) {
+                        if (deviceType.toLowerCase(Locale.ROOT).contains("tuzheng")) {
                             mInvokeTuzheng();
                         } else if (deviceType.toLowerCase(Locale.ROOT).contains("crossmatch")) {
                             mInvokeCrossmatch();
@@ -288,8 +293,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private byte[] getTuzhengData() {
         try {
-            Fingerprint fingerprint1 = device.getFingerprint(1);//1 = ISOFINGERPRINT_TYPE_ISO2005
-            return fingerprint1.getFeature();
+            FingerprintOperationResult operationResult = device.waitForFingerprint(TimeConstants.FOREVER);
+            if (operationResult.getResultCode() == OperationResult.SUCCESS) {
+                Fingerprint fingerprint = ((FingerprintOperationResult) operationResult).getFingerprint(100, 100);
+                return fingerprint.getFeature();
+            } else {
+                writerLogInTextview("scan fail", 2);
+            }
+            //Fingerprint fingerprint1 = device.getFingerprint(1);//1 = ISOFINGERPRINT_TYPE_ISO2005
+            //return fingerprint1.getFeature();
         } catch (DeviceException e) {
             writerLogInTextview(e.getMessage(), 2);
             e.printStackTrace();
